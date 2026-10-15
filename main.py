@@ -11,18 +11,15 @@ print(data.describe().round().astype(int))
 
 print("Original data: ", data.shape)
 
-print(data['price'].quantile([0.90, 0.95, 0.99, 0.995, 0.999]))
-print((data['price'] > 100000).sum(), "rows above 100k")
-print((data['price'].between(1, 999)).sum(), "rows between 1 and 999")
-
-low = data[data['price'].between(1, 999)]
-print(low['price'].value_counts().head(10))
-print(low[['price', 'year', 'odometer']].describe())
-
 # Cleaning
 data = data[data['price'].between(1000, 100000)]
 data = data[data['year'].between(1990, 2022)]
 data = data[data['odometer'].between(100, 400000)]
+
+data = data.drop_duplicates(subset=['price', 'year', 'manufacturer', 'model', 'odometer'])
+
+for col in ['manufacturer', 'title_status', 'type', 'condition']:
+    data[col] = data[col].fillna('unknown')
 
 data['cylinders'] = pd.to_numeric(data['cylinders'].str.split().str[0], errors='coerce')
 data['cylinders'] = data['cylinders'].fillna(data['cylinders'].median())
@@ -31,3 +28,4 @@ data = data.dropna(subset=['fuel', 'transmission'])
 
 print("After cleaning:", data.shape)
 print(data[['price', 'year', 'odometer']].describe())
+print(data.head(5))
